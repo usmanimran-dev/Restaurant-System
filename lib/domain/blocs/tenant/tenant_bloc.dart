@@ -14,6 +14,8 @@ class TenantBloc extends Bloc<TenantEvent, TenantState> {
         super(TenantInitial()) {
     on<LoadTenants>(_onLoadTenants);
     on<CreateTenant>(_onCreateTenant);
+    on<UpdateTenant>(_onUpdateTenant);
+    on<DeleteTenant>(_onDeleteTenant);
     on<ToggleModule>(_onToggleModule);
   }
 
@@ -30,38 +32,61 @@ class TenantBloc extends Bloc<TenantEvent, TenantState> {
   Future<void> _onCreateTenant(CreateTenant event, Emitter<TenantState> emit) async {
     emit(TenantLoading());
     try {
-      // Create Tenant
+      // Create Restaurant
       final newTenant = RestaurantModel(
-        id: '', // Supabase generated
+        id: '',
         name: event.name,
         address: event.address,
         contact: event.contact,
         enabledModules: const {
           'pos': true,
-          'inventory': false,
+          'inventory': true,
           'reports': true,
-          'salary': false,
+          'salary': true,
         },
       );
       
       final createdTenant = await _tenantRepository.createTenant(newTenant);
 
-      // Supabase Edge Functions avoided in local mock mode.
-      // Simply log the request (the new restaurant will show up as a tenant).
-      print('Mock: Created new restaurant admin for tenant ${createdTenant.id} with email ${event.adminEmail}');
+      // Automatically create a Restaurant Admin user
+      await _tenantRepository.createRestaurantAdmin(
+        restaurantId: createdTenant.id,
+        email: event.adminEmail,
+        password: event.adminPassword,
+        name: event.adminName,
+      );
 
-      emit(const TenantOperationSuccess('Tenant created successfully'));
+      emit(const TenantOperationSuccess('Restaurant & Admin created successfully!'));
       add(LoadTenants());
     } catch (e) {
       emit(TenantError(e.toString()));
-      add(LoadTenants()); // Reload to show previous state
+      add(LoadTenants());
+    }
+  }
+
+  Future<void> _onUpdateTenant(UpdateTenant event, Emitter<TenantState> emit) async {
+    try {
+      await _tenantRepository.updateTenant(event.tenantId, event.updates);
+      emit(const TenantOperationSuccess('Restaurant updated successfully.'));
+      add(LoadTenants());
+    } catch (e) {
+      emit(TenantError(e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteTenant(DeleteTenant event, Emitter<TenantState> emit) async {
+    try {
+      await _tenantRepository.deleteTenant(event.tenantId);
+      emit(const TenantOperationSuccess('Restaurant deleted successfully.'));
+      add(LoadTenants());
+    } catch (e) {
+      emit(TenantError(e.toString()));
     }
   }
 
   Future<void> _onToggleModule(ToggleModule event, Emitter<TenantState> emit) async {
     try {
       await _tenantRepository.toggleFeatureFlag(event.tenantId, event.moduleKey, event.isEnabled);
-      // We don't emit a separate loading state to avoid flashing the UI. Just reload.
       add(LoadTenants());
     } catch (e) {
       emit(TenantError(e.toString()));

@@ -34,3 +34,13 @@ class UpdateRolePermissions extends RoleEvent {
   @override
   List<Object?> get props => [roleId, permissions, restaurantId];
 }
+
+class DeleteRole extends RoleEvent {
+  final String roleId;
+  final String restaurantId;
+
+  const DeleteRole(this.roleId, this.restaurantId);
+
+  @override
+  List<Object?> get props => [roleId, restaurantId];
+}

@@ -31,3 +31,41 @@ class CreateMenuItem extends MenuEvent {
   @override
   List<Object?> get props => [item];
 }
+
+class UpdateCategory extends MenuEvent {
+  final String id;
+  final String restaurantId;
+  final Map<String, dynamic> data;
+  const UpdateCategory(this.id, this.restaurantId, this.data);
+
+  @override
+  List<Object?> get props => [id, restaurantId, data];
+}
+
+class DeleteCategory extends MenuEvent {
+  final String id;
+  final String restaurantId;
+  const DeleteCategory(this.id, this.restaurantId);
+
+  @override
+  List<Object?> get props => [id, restaurantId];
+}
+
+class UpdateMenuItem extends MenuEvent {
+  final String id;
+  final String restaurantId;
+  final Map<String, dynamic> data;
+  const UpdateMenuItem(this.id, this.restaurantId, this.data);
+
+  @override
+  List<Object?> get props => [id, restaurantId, data];
+}
+
+class DeleteMenuItem extends MenuEvent {
+  final String id;
+  final String restaurantId;
+  const DeleteMenuItem(this.id, this.restaurantId);
+
+  @override
+  List<Object?> get props => [id, restaurantId];
+}

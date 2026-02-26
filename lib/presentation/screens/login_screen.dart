@@ -65,92 +65,89 @@ class _LoginScreenState extends State<LoginScreen>
     final size = MediaQuery.sizeOf(context);
     final isWide = size.width >= 768;
 
-    return BlocProvider<AuthBloc>(
-      create: (_) => sl<AuthBloc>(),
-      child: Scaffold(
-        body: BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (state is Authenticated) {
-              final route = AppRouter.initialRouteForRole(state.role);
-              Navigator.of(context).pushReplacementNamed(route);
-            }
-            if (state is AuthError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: theme.colorScheme.error,
+    return Scaffold(
+      body: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is Authenticated) {
+            final route = AppRouter.initialRouteForRole(state.role);
+            Navigator.of(context).pushReplacementNamed(route);
+          }
+          if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: theme.colorScheme.error,
+              ),
+            );
+          }
+        },
+        child: Stack(
+          children: [
+            // ── Background gradient ───────────────────────────────────
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF13131A),
+                    Color(0xFF1A1A2E),
+                    Color(0xFF16213E),
+                  ],
                 ),
-              );
-            }
-          },
-          child: Stack(
-            children: [
-              // ── Background gradient ───────────────────────────────────
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              ),
+            ),
+
+            // ── Decorative circles ────────────────────────────────────
+            Positioned(
+              top: -80,
+              right: -80,
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
                     colors: [
-                      Color(0xFF13131A),
-                      Color(0xFF1A1A2E),
-                      Color(0xFF16213E),
+                      const Color(0xFF6C63FF).withValues(alpha: 0.15),
+                      Colors.transparent,
                     ],
                   ),
                 ),
               ),
+            ),
+            Positioned(
+              bottom: -120,
+              left: -60,
+              child: Container(
+                width: 350,
+                height: 350,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFF03DAC6).withValues(alpha: 0.10),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
-              // ── Decorative circles ────────────────────────────────────
-              Positioned(
-                top: -80,
-                right: -80,
-                child: Container(
-                  width: 300,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        const Color(0xFF6C63FF).withValues(alpha: 0.15),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
+            // ── Card ──────────────────────────────────────────────────
+            Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isWide ? size.width * 0.1 : 24,
+                  vertical: 48,
+                ),
+                child: FadeTransition(
+                  opacity: _fadeIn,
+                  child: _buildCard(theme, isWide),
                 ),
               ),
-              Positioned(
-                bottom: -120,
-                left: -60,
-                child: Container(
-                  width: 350,
-                  height: 350,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        const Color(0xFF03DAC6).withValues(alpha: 0.10),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // ── Card ──────────────────────────────────────────────────
-              Center(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isWide ? size.width * 0.1 : 24,
-                    vertical: 48,
-                  ),
-                  child: FadeTransition(
-                    opacity: _fadeIn,
-                    child: _buildCard(theme, isWide),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

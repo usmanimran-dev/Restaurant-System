@@ -13,6 +13,10 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
     on<CreateInventoryCategory>(_onCreateCategory);
     on<CreateInventoryItem>(_onCreateItem);
     on<RecordPurchase>(_onRecordPurchase);
+    on<UpdateInventoryCategory>(_onUpdateCategory);
+    on<DeleteInventoryCategory>(_onDeleteCategory);
+    on<UpdateInventoryItem>(_onUpdateItem);
+    on<DeleteInventoryItem>(_onDeleteItem);
   }
 
   Future<void> _onLoadInventory(LoadInventory event, Emitter<InventoryState> emit) async {
@@ -39,6 +43,32 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
     }
   }
 
+  Future<void> _onUpdateCategory(UpdateInventoryCategory event, Emitter<InventoryState> emit) async {
+    final currentState = state;
+    if (currentState is InventoryLoaded) {
+      try {
+        await _inventoryRepository.updateCategory(event.id, event.data);
+        emit(const InventoryOperationSuccess('Category updated successfully'));
+        add(LoadInventory(event.restaurantId));
+      } catch (e) {
+        emit(InventoryError(e.toString()));
+      }
+    }
+  }
+
+  Future<void> _onDeleteCategory(DeleteInventoryCategory event, Emitter<InventoryState> emit) async {
+    final currentState = state;
+    if (currentState is InventoryLoaded) {
+      try {
+        await _inventoryRepository.deleteCategory(event.id);
+        emit(const InventoryOperationSuccess('Category deleted successfully'));
+        add(LoadInventory(event.restaurantId));
+      } catch (e) {
+        emit(InventoryError(e.toString()));
+      }
+    }
+  }
+
   Future<void> _onCreateItem(CreateInventoryItem event, Emitter<InventoryState> emit) async {
     final currentState = state;
     if (currentState is InventoryLoaded) {
@@ -46,6 +76,32 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
         await _inventoryRepository.createItem(event.item);
         emit(const InventoryOperationSuccess('Item created successfully'));
         add(LoadInventory(event.item.restaurantId));
+      } catch (e) {
+        emit(InventoryError(e.toString()));
+      }
+    }
+  }
+
+  Future<void> _onUpdateItem(UpdateInventoryItem event, Emitter<InventoryState> emit) async {
+    final currentState = state;
+    if (currentState is InventoryLoaded) {
+      try {
+        await _inventoryRepository.updateItem(event.id, event.data);
+        emit(const InventoryOperationSuccess('Item updated successfully'));
+        add(LoadInventory(event.restaurantId));
+      } catch (e) {
+        emit(InventoryError(e.toString()));
+      }
+    }
+  }
+
+  Future<void> _onDeleteItem(DeleteInventoryItem event, Emitter<InventoryState> emit) async {
+    final currentState = state;
+    if (currentState is InventoryLoaded) {
+      try {
+        await _inventoryRepository.deleteItem(event.id);
+        emit(const InventoryOperationSuccess('Item deleted successfully'));
+        add(LoadInventory(event.restaurantId));
       } catch (e) {
         emit(InventoryError(e.toString()));
       }

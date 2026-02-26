@@ -47,4 +47,24 @@ class InventoryRepository {
 
     return PurchaseModel.fromJson(data);
   }
+
+  // ── Updates and Deletes ───────────────────────────────────────────────────
+
+  Future<InventoryCategoryModel> updateCategory(String id, Map<String, dynamic> data) async {
+    final updated = await _supabaseRepo.update('inventory_categories', id, data);
+    return InventoryCategoryModel.fromJson(updated);
+  }
+
+  Future<void> deleteCategory(String id) async {
+    await _supabaseRepo.delete('inventory_categories', id);
+  }
+
+  Future<InventoryItemModel> updateItem(String id, Map<String, dynamic> data) async {
+    final updated = await _supabaseRepo.update('inventory_items', id, data);
+    return InventoryItemModel.fromJson(updated);
+  }
+
+  Future<void> deleteItem(String id) async {
+    await _supabaseRepo.delete('inventory_items', id);
+  }
 }

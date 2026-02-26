@@ -34,3 +34,37 @@ class RecordPurchase extends InventoryEvent {
   @override
   List<Object?> get props => [purchase];
 }
+
+class UpdateInventoryCategory extends InventoryEvent {
+  final String id;
+  final String restaurantId;
+  final Map<String, dynamic> data;
+  const UpdateInventoryCategory(this.id, this.restaurantId, this.data);
+  @override
+  List<Object?> get props => [id, restaurantId, data];
+}
+
+class DeleteInventoryCategory extends InventoryEvent {
+  final String id;
+  final String restaurantId;
+  const DeleteInventoryCategory(this.id, this.restaurantId);
+  @override
+  List<Object?> get props => [id, restaurantId];
+}
+
+class UpdateInventoryItem extends InventoryEvent {
+  final String id;
+  final String restaurantId;
+  final Map<String, dynamic> data;
+  const UpdateInventoryItem(this.id, this.restaurantId, this.data);
+  @override
+  List<Object?> get props => [id, restaurantId, data];
+}
+
+class DeleteInventoryItem extends InventoryEvent {
+  final String id;
+  final String restaurantId;
+  const DeleteInventoryItem(this.id, this.restaurantId);
+  @override
+  List<Object?> get props => [id, restaurantId];
+}

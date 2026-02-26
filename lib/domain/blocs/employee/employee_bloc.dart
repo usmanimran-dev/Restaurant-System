@@ -12,6 +12,7 @@ class EmployeeBloc extends Bloc<EmployeeEvent, EmployeeState> {
     on<LoadEmployees>(_onLoadEmployees);
     on<CreateEmployee>(_onCreateEmployee);
     on<UpdateEmployee>(_onUpdateEmployee);
+    on<DeleteEmployee>(_onDeleteEmployee);
   }
 
   Future<void> _onLoadEmployees(LoadEmployees event, Emitter<EmployeeState> emit) async {
@@ -27,8 +28,6 @@ class EmployeeBloc extends Bloc<EmployeeEvent, EmployeeState> {
   Future<void> _onCreateEmployee(CreateEmployee event, Emitter<EmployeeState> emit) async {
     emit(EmployeeLoading());
     try {
-      // In production, user creation needs a secure RPC or Edge Function to link Auth to Public.
-      // We assume the schema triggers sync this.
       await _employeeRepository.createEmployee(event.employee);
       emit(const EmployeeOperationSuccess('Employee added successfully.'));
       add(LoadEmployees(event.employee.restaurantId));
@@ -42,7 +41,17 @@ class EmployeeBloc extends Bloc<EmployeeEvent, EmployeeState> {
     try {
       await _employeeRepository.updateEmployee(event.employeeId, event.updates);
       emit(const EmployeeOperationSuccess('Employee updated successfully.'));
-      // Note: Current state needs to provide restaurantId to reload, omitting for brevity
+      add(LoadEmployees(event.restaurantId));
+    } catch (e) {
+      emit(EmployeeError(e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteEmployee(DeleteEmployee event, Emitter<EmployeeState> emit) async {
+    try {
+      await _employeeRepository.deleteEmployee(event.employeeId);
+      emit(const EmployeeOperationSuccess('Employee deleted successfully.'));
+      add(LoadEmployees(event.restaurantId));
     } catch (e) {
       emit(EmployeeError(e.toString()));
     }

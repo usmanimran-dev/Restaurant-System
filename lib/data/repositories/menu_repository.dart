@@ -25,4 +25,22 @@ class MenuRepository {
     final data = await _supabaseRepo.insert('menu_items', item.toJson());
     return MenuItemModel.fromJson(data);
   }
+
+  Future<MenuCategoryModel> updateCategory(String id, Map<String, dynamic> data) async {
+    final updated = await _supabaseRepo.update('menu_categories', id, data);
+    return MenuCategoryModel.fromJson(updated);
+  }
+
+  Future<void> deleteCategory(String id) async {
+    await _supabaseRepo.delete('menu_categories', id);
+  }
+
+  Future<MenuItemModel> updateItem(String id, Map<String, dynamic> data) async {
+    final updated = await _supabaseRepo.update('menu_items', id, data);
+    return MenuItemModel.fromJson(updated);
+  }
+
+  Future<void> deleteItem(String id) async {
+    await _supabaseRepo.delete('menu_items', id);
+  }
 }

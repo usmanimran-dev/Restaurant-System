@@ -18,7 +18,7 @@ class LoadEmployees extends EmployeeEvent {
 
 class CreateEmployee extends EmployeeEvent {
   final EmployeeModel employee;
-  final String rawPassword; // Standard Supabase auth needs a password payload
+  final String rawPassword;
 
   const CreateEmployee(this.employee, this.rawPassword);
 
@@ -28,10 +28,21 @@ class CreateEmployee extends EmployeeEvent {
 
 class UpdateEmployee extends EmployeeEvent {
   final String employeeId;
+  final String restaurantId;
   final Map<String, dynamic> updates;
 
-  const UpdateEmployee(this.employeeId, this.updates);
+  const UpdateEmployee(this.employeeId, this.restaurantId, this.updates);
 
   @override
-  List<Object?> get props => [employeeId, updates];
+  List<Object?> get props => [employeeId, restaurantId, updates];
+}
+
+class DeleteEmployee extends EmployeeEvent {
+  final String employeeId;
+  final String restaurantId;
+
+  const DeleteEmployee(this.employeeId, this.restaurantId);
+
+  @override
+  List<Object?> get props => [employeeId, restaurantId];
 }

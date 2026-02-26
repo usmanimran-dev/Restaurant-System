@@ -11,7 +11,7 @@ import 'package:restaurant/presentation/screens/restaurant_admin_menu_tab.dart';
 import 'package:restaurant/presentation/screens/restaurant_admin_payroll_tab.dart';
 import 'package:restaurant/presentation/screens/restaurant_admin_inventory_tab.dart';
 import 'package:restaurant/presentation/screens/restaurant_admin_reports_tab.dart';
-import 'package:restaurant/presentation/screens/pos_screen.dart';
+import 'package:restaurant/presentation/screens/restaurant_admin_orders_tab.dart';
 
 /// Restaurant Admin dashboard – manages a single tenant's operations.
 class RestaurantAdminDashboard extends StatefulWidget {
@@ -120,7 +120,7 @@ class _RestaurantAdminDashboardState extends State<RestaurantAdminDashboard> {
     } else if (label == 'Staff') {
       return const StaffTab();
     } else if (label == 'Orders') {
-      return const PosScreen(); // POS acts as the active Orders management tab
+      return const OrdersTab();
     } else if (label == 'Inventory') {
       return const InventoryTab();
     } else if (label == 'Payroll') {

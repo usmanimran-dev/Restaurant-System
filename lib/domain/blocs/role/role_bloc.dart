@@ -12,6 +12,7 @@ class RoleBloc extends Bloc<RoleEvent, RoleState> {
     on<LoadRoles>(_onLoadRoles);
     on<CreateRole>(_onCreateRole);
     on<UpdateRolePermissions>(_onUpdateRolePermissions);
+    on<DeleteRole>(_onDeleteRole);
   }
 
   Future<void> _onLoadRoles(LoadRoles event, Emitter<RoleState> emit) async {
@@ -41,6 +42,16 @@ class RoleBloc extends Bloc<RoleEvent, RoleState> {
     try {
       await _roleRepository.updateRole(event.roleId, {'permissions': event.permissions});
       emit(const RoleOperationSuccess('Permissions updated successfully.'));
+      add(LoadRoles(event.restaurantId));
+    } catch (e) {
+      emit(RoleError(e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteRole(DeleteRole event, Emitter<RoleState> emit) async {
+    try {
+      await _roleRepository.deleteRole(event.roleId);
+      emit(const RoleOperationSuccess('Role deleted successfully.'));
       add(LoadRoles(event.restaurantId));
     } catch (e) {
       emit(RoleError(e.toString()));

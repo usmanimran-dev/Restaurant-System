@@ -13,9 +13,9 @@ class CreateTenant extends TenantEvent {
   final String name;
   final String? address;
   final String? contact;
-  // A password for the auto-created admin account can be specified if needed
   final String adminEmail;
   final String adminPassword;
+  final String adminName;
 
   const CreateTenant({
     required this.name,
@@ -23,10 +23,30 @@ class CreateTenant extends TenantEvent {
     this.contact,
     required this.adminEmail,
     required this.adminPassword,
+    this.adminName = 'Restaurant Admin',
   });
 
   @override
-  List<Object?> get props => [name, address, contact, adminEmail, adminPassword];
+  List<Object?> get props => [name, address, contact, adminEmail, adminPassword, adminName];
+}
+
+class UpdateTenant extends TenantEvent {
+  final String tenantId;
+  final Map<String, dynamic> updates;
+
+  const UpdateTenant(this.tenantId, this.updates);
+
+  @override
+  List<Object?> get props => [tenantId, updates];
+}
+
+class DeleteTenant extends TenantEvent {
+  final String tenantId;
+
+  const DeleteTenant(this.tenantId);
+
+  @override
+  List<Object?> get props => [tenantId];
 }
 
 class ToggleModule extends TenantEvent {
