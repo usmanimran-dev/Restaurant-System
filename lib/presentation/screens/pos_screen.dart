@@ -181,9 +181,8 @@ class _PosViewState extends State<_PosView> {
                       double subtotal = 0, tax = 0, total = 0;
                       if (state is OrderLoaded) {
                         subtotal = state.cartSubtotal;
-                        // For display, simulate checkbox UI (logic handled in SubmitOrder)
-                        tax = _applyFbr ? subtotal * 0.16 : 0;
-                        total = subtotal + tax;
+                        tax = state.cartTax;
+                        total = state.cartTotal;
                       }
 
                       return Column(
@@ -213,6 +212,9 @@ class _PosViewState extends State<_PosView> {
                                 items: const [
                                   DropdownMenuItem(value: 'cash', child: Text('Cash')),
                                   DropdownMenuItem(value: 'card', child: Text('Card')),
+                                  DropdownMenuItem(value: 'jazzcash', child: Text('JazzCash')),
+                                  DropdownMenuItem(value: 'easypaisa', child: Text('Easypaisa')),
+                                  DropdownMenuItem(value: 'bank_transfer', child: Text('Bank Transfer')),
                                 ],
                                 onChanged: (v) => setState(() => _paymentMethod = v!),
                               )
@@ -220,14 +222,24 @@ class _PosViewState extends State<_PosView> {
                           ),
                           CheckboxListTile(
                             contentPadding: EdgeInsets.zero,
-                            title: const Text('Apply FBR Tax (16%)'),
+                            title: const Text('Apply GST Tax (17%)'),
                             value: _applyFbr,
-                            onChanged: (v) => setState(() => _applyFbr = v ?? false),
+                            onChanged: (v) {
+                              setState(() => _applyFbr = v ?? false);
+                              context.read<OrderBloc>().add(SetTaxRate(_applyFbr ? 0.17 : 0));
+                            },
                             controlAffinity: ListTileControlAffinity.leading,
                           ),
                           const Divider(height: 32),
                           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Subtotal'), Text('\$${subtotal.toStringAsFixed(2)}')]),
                           const SizedBox(height: 8),
+                          if (state is OrderLoaded && state.cartDiscount > 0) ...[
+                            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                              Text('Discount${state.discountName != null ? " (${state.discountName})" : ""}'),
+                              Text('-\$${state.cartDiscount.toStringAsFixed(2)}', style: const TextStyle(color: Colors.green)),
+                            ]),
+                            const SizedBox(height: 8),
+                          ],
                           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Tax'), Text('\$${tax.toStringAsFixed(2)}')]),
                           const SizedBox(height: 16),
                           Row(
@@ -246,7 +258,6 @@ class _PosViewState extends State<_PosView> {
                                       employeeId: widget.employeeId,
                                       type: _orderType,
                                       paymentMethod: _paymentMethod,
-                                      applyFbrTax: _applyFbr,
                                     ));
                                   }
                                 : null,

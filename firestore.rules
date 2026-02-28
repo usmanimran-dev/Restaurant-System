@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function userRoleName() {
+      return userDoc().data.role_name;
+    }
+
+    function userRestaurantId() {
+      return userDoc().data.restaurant_id;
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && userRoleName() == 'super_admin';
+    }
+
+    function hasRestaurantAccess(restaurantId) {
+      return isSuperAdmin() || (isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && userRestaurantId() == restaurantId);
+    }
+
+    function isRestaurantAdminFor(restaurantId) {
+      return hasRestaurantAccess(restaurantId) && (isSuperAdmin() || userRoleName() == 'restaurant_admin');
+    }
+
+    function resourceRestaurantId() {
+      return resource.data.restaurant_id;
+    }
+
+    function requestRestaurantId() {
+      return request.resource.data.restaurant_id;
+    }
+
+    // Platform namespace (super admin only)
+    match /platform/{document=**} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    // User profiles (flat)
+    match /users/{userId} {
+      allow read: if isSignedIn() && userId == request.auth.uid;
+      allow create: if isSignedIn() && userId == request.auth.uid;
+      allow update: if isSignedIn() && userId == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // Restaurants
+    match /restaurants/{restaurantId} {
+      allow read: if hasRestaurantAccess(restaurantId);
+      allow create: if isSuperAdmin();
+      allow update, delete: if isRestaurantAdminFor(restaurantId);
+
+      match /kds_orders/{orderId} {
+        allow read, write: if hasRestaurantAccess(restaurantId);
+      }
+      match /stations/{stationId} {
+        allow read, write: if hasRestaurantAccess(restaurantId);
+      }
+    }
+
+    // Generic tenant-scoped collections (flat) enforced via restaurant_id field
+    match /{collectionId}/{docId} {
+      allow read: if isSignedIn() && (resource.data.restaurant_id is string) && hasRestaurantAccess(resourceRestaurantId());
+
+      allow create: if isSignedIn()
+        && (request.resource.data.restaurant_id is string)
+        && hasRestaurantAccess(requestRestaurantId());
+
+      allow update: if isSignedIn()
+        && (resource.data.restaurant_id is string)
+        && hasRestaurantAccess(resourceRestaurantId())
+        && (request.resource.data.restaurant_id == resource.data.restaurant_id);
+
+      allow delete: if isSignedIn()
+        && (resource.data.restaurant_id is string)
+        && isRestaurantAdminFor(resourceRestaurantId());
+    }
+  }
+}

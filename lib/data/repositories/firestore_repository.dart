@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
-/// Now backed by Firebase Firestore! (Kept class name for DI compatibility)
-class SupabaseRepository {
-  SupabaseRepository();
+/// Core Firestore repository for all CRUD operations.
+class FirestoreRepository {
+  FirestoreRepository();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Uuid _uuid = const Uuid();

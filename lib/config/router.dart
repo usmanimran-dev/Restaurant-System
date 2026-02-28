@@ -4,6 +4,8 @@ import 'package:restaurant/presentation/screens/employee_dashboard.dart';
 import 'package:restaurant/presentation/screens/login_screen.dart';
 import 'package:restaurant/presentation/screens/restaurant_admin_dashboard.dart';
 import 'package:restaurant/presentation/screens/super_admin_dashboard.dart';
+import 'package:restaurant/presentation/screens/kds_screen.dart';
+import 'package:restaurant/presentation/screens/customer_menu_screen.dart';
 
 /// Application route names.
 class Routes {
@@ -13,6 +15,7 @@ class Routes {
   static const String superAdmin = '/super-admin';
   static const String restaurantAdmin = '/restaurant-admin';
   static const String employee = '/employee';
+  static const String kds = '/kds';
 }
 
 /// Central router that generates routes and handles role‑based redirection.
@@ -42,7 +45,15 @@ class AppRouter {
         return _buildRoute(const RestaurantAdminDashboard(), settings);
       case Routes.employee:
         return _buildRoute(const EmployeeDashboard(), settings);
+      case Routes.kds:
+        return _buildRoute(const KdsScreen(), settings);
       default:
+        // Handle dynamic parameter routes via regex or string matching.
+        // For production, use 'go_router', this is a basic mapping for MVP.
+        if (settings.name != null && settings.name!.startsWith('/menu/')) {
+          final id = settings.name!.replaceFirst('/menu/', '');
+          return _buildRoute(CustomerMenuScreen(restaurantId: id), settings);
+        }
         return _buildRoute(const LoginScreen(), settings);
     }
   }

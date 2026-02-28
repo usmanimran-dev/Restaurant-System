@@ -1,17 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:restaurant/data/models/employee_model.dart';
-import 'package:restaurant/data/repositories/supabase_repository.dart';
+import 'package:restaurant/data/repositories/firestore_repository.dart';
 
 class EmployeeRepository {
-  EmployeeRepository(this._supabaseRepo);
+  EmployeeRepository(this._firestoreRepo);
 
-  final SupabaseRepository _supabaseRepo;
+  final FirestoreRepository _firestoreRepo;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const String _table = 'employees';
 
   Future<List<EmployeeModel>> fetchEmployees(String restaurantId) async {
-    final data = await _supabaseRepo.fetchAll(
+    final data = await _firestoreRepo.fetchAll(
       _table, 
       restaurantId: restaurantId,
     );
@@ -19,7 +19,7 @@ class EmployeeRepository {
   }
 
   Future<EmployeeModel> createEmployee(EmployeeModel employee) async {
-    final data = await _supabaseRepo.insert(_table, employee.toJson());
+    final data = await _firestoreRepo.insert(_table, employee.toJson());
     return EmployeeModel.fromJson(data);
   }
 
@@ -66,12 +66,12 @@ class EmployeeRepository {
   }
 
   Future<EmployeeModel> updateEmployee(String id, Map<String, dynamic> updates) async {
-    final data = await _supabaseRepo.update(_table, id, updates);
+    final data = await _firestoreRepo.update(_table, id, updates);
     return EmployeeModel.fromJson(data);
   }
 
   Future<void> deleteEmployee(String id) async {
-    await _supabaseRepo.delete(_table, id);
+    await _firestoreRepo.delete(_table, id);
     // Also remove user doc if it exists
     try {
       await _firestore.collection('users').doc(id).delete();

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant/config/router.dart';
 import 'package:restaurant/core/di/injection_container.dart';
+import 'package:restaurant/data/repositories/tenant_repository.dart';
 import 'package:restaurant/domain/blocs/auth/auth_bloc.dart';
 import 'package:restaurant/domain/blocs/auth/auth_event.dart';
 import 'package:restaurant/domain/blocs/tenant/tenant_bloc.dart';
@@ -178,6 +179,7 @@ class _RestaurantsTabViewState extends State<_RestaurantsTabView> {
                     tenant: tenants[index],
                     onEdit: () => _showEditDialog(context, tenants[index]),
                     onDelete: () => _confirmDelete(context, tenants[index]),
+                    onSeedData: () => _seedFullDataForRestaurant(context, tenants[index]),
                     onManage: () {
                       context.read<AuthBloc>().add(
                         SwitchRestaurantContext(
@@ -350,6 +352,33 @@ class _RestaurantsTabViewState extends State<_RestaurantsTabView> {
     );
   }
 
+  Future<void> _seedFullDataForRestaurant(BuildContext context, RestaurantModel tenant) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (c) => const Center(child: CircularProgressIndicator()),
+      );
+      await sl<TenantRepository>().seedRestaurantData(tenant.id);
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Full data seeded for ${tenant.name}!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to seed: $e'), backgroundColor: Theme.of(context).colorScheme.error),
+        );
+      }
+    }
+  }
+
   void _confirmDelete(BuildContext parentContext, RestaurantModel tenant) {
     showDialog(
       context: parentContext,
@@ -378,11 +407,12 @@ class _RestaurantsTabViewState extends State<_RestaurantsTabView> {
   Future<void> _seedDemoData(BuildContext context) async {
     final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Generating Demo Data...')),
+      const SnackBar(content: Text('Generating demo restaurants & seeding full data...')),
     );
 
     try {
       final firestore = FirebaseFirestore.instance;
+      final tenantRepo = sl<TenantRepository>();
       final String demoRid = 'demo-restaurant-123';
 
       await firestore.collection('restaurants').doc(demoRid).set({
@@ -418,9 +448,16 @@ class _RestaurantsTabViewState extends State<_RestaurantsTabView> {
         'created_at': DateTime.now().toIso8601String(),
       }, SetOptions(merge: true));
 
+      // Seed full data (menu, orders, KDS, inventory, suppliers, etc.) for demo restaurant
+      await tenantRepo.seedRestaurantData(demoRid);
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Demo data generated! Refreshing...'), backgroundColor: Colors.green),
+          const SnackBar(
+            content: Text('Demo restaurants created & full data seeded for demo-restaurant-123! Switch to Manage to view.'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 4),
+          ),
         );
         context.read<TenantBloc>().add(LoadTenants());
       }
@@ -440,12 +477,14 @@ class _RestaurantCard extends StatelessWidget {
   final RestaurantModel tenant;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onSeedData;
   final VoidCallback onManage;
 
   const _RestaurantCard({
     required this.tenant,
     required this.onEdit,
     required this.onDelete,
+    required this.onSeedData,
     required this.onManage,
   });
 
@@ -496,6 +535,11 @@ class _RestaurantCard extends StatelessWidget {
                       ),
                       Row(
                         children: [
+                          IconButton(
+                            icon: const Icon(Icons.auto_awesome, size: 20),
+                            tooltip: 'Seed Full Data',
+                            onPressed: onSeedData,
+                          ),
                           IconButton(
                             icon: const Icon(Icons.edit_outlined, size: 20),
                             tooltip: 'Edit',

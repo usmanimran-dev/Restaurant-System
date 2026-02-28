@@ -66,6 +66,7 @@ class _LoginScreenState extends State<LoginScreen>
     final isWide = size.width >= 768;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
@@ -83,53 +84,28 @@ class _LoginScreenState extends State<LoginScreen>
         },
         child: Stack(
           children: [
-            // ── Background gradient ───────────────────────────────────
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF13131A),
-                    Color(0xFF1A1A2E),
-                    Color(0xFF16213E),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Decorative circles ────────────────────────────────────
+            // ── Decorative Clean Shapes ────────────────────────────────────
             Positioned(
-              top: -80,
-              right: -80,
+              top: -100,
+              right: -100,
               child: Container(
-                width: 300,
-                height: 300,
+                width: 400,
+                height: 400,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFF6C63FF).withValues(alpha: 0.15),
-                      Colors.transparent,
-                    ],
-                  ),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.05),
                 ),
               ),
             ),
             Positioned(
-              bottom: -120,
-              left: -60,
+              bottom: -150,
+              left: -100,
               child: Container(
-                width: 350,
-                height: 350,
+                width: 500,
+                height: 500,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFF03DAC6).withValues(alpha: 0.10),
-                      Colors.transparent,
-                    ],
-                  ),
+                  color: theme.colorScheme.secondary.withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -154,146 +130,151 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _buildCard(ThemeData theme, bool isWide) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          width: isWide ? 460 : double.infinity,
-          padding: const EdgeInsets.all(36),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E1E2C).withValues(alpha: 0.75),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.4),
-                blurRadius: 40,
-                offset: const Offset(0, 16),
-              ),
-            ],
+    return Container(
+      width: isWide ? 460 : double.infinity,
+      padding: const EdgeInsets.all(48),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ── Logo / Title ────────────────────────────────────────
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF6C63FF), Color(0xFF03DAC6)],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(
-                    Icons.restaurant_rounded,
-                    color: Colors.white,
-                    size: 32,
-                  ),
+        ],
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Logo / Title ────────────────────────────────────────
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                const SizedBox(height: 24),
-                Text(
-                  AppConstants.appName,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
+                child: Icon(
+                  Icons.storefront_rounded,
+                  color: theme.colorScheme.primary,
+                  size: 36,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Sign in to manage your restaurant',
-                  style: theme.textTheme.bodyMedium?.copyWith(
+              ),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'Welcome Back',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Sign in to manage your restaurant',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.hintColor,
+              ),
+            ),
+            const SizedBox(height: 48),
+
+            // ── Email ───────────────────────────────────────────────
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              style: TextStyle(color: theme.colorScheme.onSurface),
+              decoration: InputDecoration(
+                hintText: 'Email address',
+                prefixIcon: Icon(Icons.email_outlined, color: theme.hintColor),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your email';
+                }
+                if (!value.contains('@')) return 'Enter a valid email';
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+
+            // ── Password ────────────────────────────────────────────
+            TextFormField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              style: TextStyle(color: theme.colorScheme.onSurface),
+              decoration: InputDecoration(
+                hintText: 'Password',
+                prefixIcon: Icon(Icons.lock_outline, color: theme.hintColor),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
                     color: theme.hintColor,
                   ),
-                ),
-                const SizedBox(height: 36),
-
-                // ── Email ───────────────────────────────────────────────
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    hintText: 'Email address',
-                    prefixIcon: Icon(Icons.email_outlined),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!value.contains('@')) return 'Enter a valid email';
-                    return null;
+                  onPressed: () {
+                    setState(() => _obscurePassword = !_obscurePassword);
                   },
                 ),
-                const SizedBox(height: 18),
-
-                // ── Password ────────────────────────────────────────────
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                      ),
-                      onPressed: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 28),
-
-                // ── Submit ──────────────────────────────────────────────
-                BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, state) {
-                    if (state is AuthLoading) {
-                      return const SizedBox(
-                        height: 56,
-                        child: LoadingWidget(),
-                      );
-                    }
-
-                    return SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: () => _onSubmit(context),
-                        child: const Text('Sign In'),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Secure multi‑tenant platform',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.hintColor.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your password';
+                }
+                if (value.length < 6) {
+                  return 'Password must be at least 6 characters';
+                }
+                return null;
+              },
             ),
-          ),
+            const SizedBox(height: 12),
+            
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                ),
+                child: const Text('Forgot Password?'),
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // ── Submit ──────────────────────────────────────────────
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                if (state is AuthLoading) {
+                  return const SizedBox(
+                    height: 56,
+                    child: LoadingWidget(),
+                  );
+                }
+
+                return ElevatedButton(
+                  onPressed: () => _onSubmit(context),
+                  child: const Text('Sign In'),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Secure multi‑tenant platform',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.hintColor,
+              ),
+            ),
+          ],
         ),
       ),
     );

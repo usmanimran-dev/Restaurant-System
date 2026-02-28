@@ -1,28 +1,28 @@
 import 'package:restaurant/data/models/role_model.dart';
-import 'package:restaurant/data/repositories/supabase_repository.dart';
+import 'package:restaurant/data/repositories/firestore_repository.dart';
 
 class RoleRepository {
-  RoleRepository(this._supabaseRepo);
+  RoleRepository(this._firestoreRepo);
 
-  final SupabaseRepository _supabaseRepo;
+  final FirestoreRepository _firestoreRepo;
   static const String _table = 'roles';
 
   Future<List<RoleModel>> fetchRoles(String restaurantId) async {
-    final data = await _supabaseRepo.fetchAll(_table, restaurantId: restaurantId);
+    final data = await _firestoreRepo.fetchAll(_table, restaurantId: restaurantId);
     return data.map((json) => RoleModel.fromJson(json)).toList();
   }
 
   Future<RoleModel> createRole(RoleModel role) async {
-    final data = await _supabaseRepo.insert(_table, role.toJson());
+    final data = await _firestoreRepo.insert(_table, role.toJson());
     return RoleModel.fromJson(data);
   }
 
   Future<RoleModel> updateRole(String id, Map<String, dynamic> updates) async {
-    final data = await _supabaseRepo.update(_table, id, updates);
+    final data = await _firestoreRepo.update(_table, id, updates);
     return RoleModel.fromJson(data);
   }
 
   Future<void> deleteRole(String id) async {
-    await _supabaseRepo.delete(_table, id);
+    await _firestoreRepo.delete(_table, id);
   }
 }

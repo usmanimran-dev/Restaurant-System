@@ -12,6 +12,15 @@ import 'package:restaurant/presentation/screens/restaurant_admin_payroll_tab.dar
 import 'package:restaurant/presentation/screens/restaurant_admin_inventory_tab.dart';
 import 'package:restaurant/presentation/screens/restaurant_admin_reports_tab.dart';
 import 'package:restaurant/presentation/screens/restaurant_admin_orders_tab.dart';
+import 'package:restaurant/presentation/screens/restaurant_admin_tax_tab.dart';
+import 'package:restaurant/presentation/screens/restaurant_admin_discounts_tab.dart';
+import 'package:restaurant/presentation/screens/restaurant_admin_audit_logs_tab.dart';
+import 'package:restaurant/presentation/screens/restaurant_admin_delivery_tab.dart';
+import 'package:restaurant/presentation/screens/restaurant_admin_supplier_tab.dart';
+import 'package:restaurant/presentation/screens/restaurant_admin_customer_tab.dart';
+import 'package:restaurant/presentation/screens/kds_screen.dart';
+import 'package:restaurant/domain/blocs/auth/auth_state.dart';
+import 'package:restaurant/core/utils/demo_data_seeder.dart';
 
 /// Restaurant Admin dashboard – manages a single tenant's operations.
 class RestaurantAdminDashboard extends StatefulWidget {
@@ -27,12 +36,18 @@ class _RestaurantAdminDashboardState extends State<RestaurantAdminDashboard> {
 
   static const _navItems = <_NavItem>[
     _NavItem(icon: Icons.restaurant_menu_rounded, label: 'Menu'),
-    _NavItem(icon: Icons.group_rounded, label: 'Staff'),
     _NavItem(icon: Icons.receipt_long_rounded, label: 'Orders'),
+    _NavItem(icon: Icons.price_change_rounded, label: 'Discounts'),
     _NavItem(icon: Icons.inventory_2_rounded, label: 'Inventory'),
+    _NavItem(icon: Icons.delivery_dining_rounded, label: 'Delivery'),
+    _NavItem(icon: Icons.business_rounded, label: 'Suppliers'),
+    _NavItem(icon: Icons.people_rounded, label: 'Customers'),
+    _NavItem(icon: Icons.group_rounded, label: 'Staff'),
     _NavItem(icon: Icons.request_quote_rounded, label: 'Payroll'),
     _NavItem(icon: Icons.analytics_rounded, label: 'Reports'),
     _NavItem(icon: Icons.security_rounded, label: 'Roles'),
+    _NavItem(icon: Icons.gavel_rounded, label: 'Tax & FBR'),
+    _NavItem(icon: Icons.history_rounded, label: 'Audit Logs'),
   ];
 
   @override
@@ -109,7 +124,21 @@ class _RestaurantAdminDashboardState extends State<RestaurantAdminDashboard> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          DemoDataSeeder.seedRestaurantData(_restaurantId, context);
+        },
+        icon: const Icon(Icons.auto_awesome),
+        label: const Text('Seed Demo Data'),
+        backgroundColor: Colors.amber,
+      ),
     );
+  }
+
+  String get _restaurantId {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is Authenticated) return authState.user.restaurantId ?? '';
+    return '';
   }
 
   Widget _buildContentArea(ThemeData theme) {
@@ -129,6 +158,18 @@ class _RestaurantAdminDashboardState extends State<RestaurantAdminDashboard> {
       return const ReportsTab();
     } else if (label == 'Roles') {
       return const RolesTab();
+    } else if (label == 'Discounts') {
+      return const DiscountsTab();
+    } else if (label == 'Tax & FBR') {
+      return const TaxTab();
+    } else if (label == 'Audit Logs') {
+      return const AuditLogsTab();
+    } else if (label == 'Delivery') {
+      return DeliveryTab(restaurantId: _restaurantId);
+    } else if (label == 'Suppliers') {
+      return SupplierTab(restaurantId: _restaurantId);
+    } else if (label == 'Customers') {
+      return CustomerTab(restaurantId: _restaurantId);
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
